@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Comprar boleto</h2>
+
+<div class="card p-3">
+    <p><strong>Viaje:</strong> {{ viaje }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-success">Comprar</button>
+    </form>
+</div>
+{% endblock %}

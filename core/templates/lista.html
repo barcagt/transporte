@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Viajes disponibles</h2>
+
+{% if viajes %}
+<div class="row">
+{% for viaje in viajes %}
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ viaje.ruta.origen }} → {{ viaje.ruta.destino }}</h5>
+                <p>Fecha: {{ viaje.fecha_hora }}</p>
+                <p>Precio: Q{{ viaje.ruta.precio }}</p>
+
+                <a href="/comprar/{{ viaje.id }}/" class="btn btn-success">
+                    Comprar boleto
+                </a>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% else %}
+<p>No hay viajes disponibles</p>
+{% endif %}
+
+{% endblock %}

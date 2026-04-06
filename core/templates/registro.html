@@ -1,0 +1,10 @@
+<h1>Registro</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <input name="username" placeholder="Usuario">
+    <input name="correo" placeholder="Correo">
+    <input name="dpi" placeholder="DPI">
+    <input type="password" name="password" placeholder="Contraseña">
+    <button type="submit">Registrarse</button>
+</form>

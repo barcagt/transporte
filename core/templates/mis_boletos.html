@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Mis boletos</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Viaje</th>
+            <th>Asiento</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for boleto in boletos %}
+        <tr>
+            <td>{{ boleto.viaje }}</td>
+            <td>{{ boleto.asiento }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No tienes boletos</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,1 @@
+web: gunicorn central_transporte_2.wsgi
