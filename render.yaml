@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: transporte
-    runtime: python
-    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
-    startCommand: gunicorn config.wsgi
