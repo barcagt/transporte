@@ -9,7 +9,7 @@ class BoletoPurchaseForm(forms.Form):
         help_text='Puedes elegir hasta el número de asientos disponibles.'
     )
     asiento = forms.ChoiceField(
-        label='Selecciona asiento (para 1 boleto)',
+        label='Selecciona asiento (solo para 1 boleto)',
         required=False
     )
 
@@ -18,7 +18,7 @@ class BoletoPurchaseForm(forms.Form):
         available_seats = available_seats or []
         choices = [('', 'Elige un asiento')] + [(str(seat), str(seat)) for seat in available_seats]
         self.fields['asiento'].choices = choices
-        max_tickets = max(1, min(5, len(available_seats)))
+        max_tickets = min(5, len(available_seats)) or 1
         self.fields['cantidad'].max_value = max_tickets
         self.fields['cantidad'].widget.attrs.update({'min': 1, 'max': max_tickets})
         self.available_seats = available_seats

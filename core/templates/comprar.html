@@ -18,7 +18,21 @@
             {% if disponibles %}
                 <form method="post" class="mb-3">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    <div class="mb-3">
+                        {{ form.cantidad.label_tag }}
+                        {{ form.cantidad }}
+                        {% if form.cantidad.errors %}
+                            <div class="text-danger">{{ form.cantidad.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 campo-asiento">
+                        {{ form.asiento.label_tag }}
+                        {{ form.asiento }}
+                        {% if form.asiento.errors %}
+                            <div class="text-danger">{{ form.asiento.errors }}</div>
+                        {% endif %}
+                        <div class="form-text" id="asientoHelp">Selecciona el asiento solo cuando compres 1 boleto. Si eliges más de 1, se asignarán asientos disponibles automáticamente.</div>
+                    </div>
                     <button class="btn btn-success">Comprar</button>
                 </form>
                 <div class="alert alert-info py-2">
@@ -49,16 +63,17 @@
 <style>
 .seat-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
 }
 .seat {
-    border-radius: 12px;
-    padding: 18px 0;
+    border-radius: 10px;
+    padding: 10px 0;
     text-align: center;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 .seat-disponible {
     background: #198754;
@@ -66,5 +81,32 @@
 .seat-ocupado {
     background: #dc3545;
 }
+@media (max-width: 768px) {
+    .seat-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cantidadInput = document.querySelector('input[name="cantidad"]');
+        const asientoDiv = document.querySelector('.campo-asiento');
+
+        function updateSeatField() {
+            if (!cantidadInput || !asientoDiv) {
+                return;
+            }
+            if (parseInt(cantidadInput.value, 10) === 1) {
+                asientoDiv.style.display = 'block';
+            } else {
+                asientoDiv.style.display = 'none';
+            }
+        }
+
+        if (cantidadInput && asientoDiv) {
+            updateSeatField();
+            cantidadInput.addEventListener('input', updateSeatField);
+        }
+    });
+</script>
 {% endblock %}

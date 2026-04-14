@@ -50,7 +50,20 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+
+def get_pasajero(request):
+    pasajero, _ = Pasajero.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'dpi': '0000',
+            'correo': request.user.email or 'correo@test.com'
+        }
+    )
+    return pasajero
+
+
 def build_seat_layout(capacidad, ocupados):
+    ocupados = set(ocupados)
     return [
         {
             'numero': n,
@@ -63,15 +76,9 @@ def build_seat_layout(capacidad, ocupados):
 def comprar_boleto(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
 
-    pasajero, _ = Pasajero.objects.get_or_create(
-        user=request.user,
-        defaults={
-            'dpi': '0000',
-            'correo': request.user.email or 'correo@test.com'
-        }
-    )
+    pasajero = get_pasajero(request)
 
-    ocupados = list(Boleto.objects.filter(viaje=viaje).values_list('asiento', flat=True))
+    ocupados = set(Boleto.objects.filter(viaje=viaje).values_list('asiento', flat=True))
     capacidad = viaje.bus.capacidad
     disponibles = [s for s in range(1, capacidad + 1) if s not in ocupados]
     seat_layout = build_seat_layout(capacidad, ocupados)
@@ -154,11 +161,7 @@ def admin_panel(request):
 
 @login_required
 def mis_boletos(request):
-    pasajero, _ = Pasajero.objects.get_or_create(
-        user=request.user,
-        defaults={'dpi': '0000', 'correo': request.user.email or 'correo@test.com'}
-    )
-
+    pasajero = get_pasajero(request)
     boletos = Boleto.objects.filter(pasajero=pasajero)
     return render(request, 'mis_boletos.html', {'boletos': boletos})
 
