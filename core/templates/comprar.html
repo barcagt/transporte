@@ -18,6 +18,7 @@
             {% if disponibles %}
                 <form method="post" class="mb-3">
                     {% csrf_token %}
+                    {{ form.non_field_errors }}
                     <div class="mb-3">
                         {{ form.cantidad.label_tag }}
                         {{ form.cantidad }}

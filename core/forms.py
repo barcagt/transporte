@@ -36,6 +36,12 @@ class BoletoPurchaseForm(forms.Form):
 
         return cleaned
 
+    def clean_asiento(self):
+        asiento = self.cleaned_data.get('asiento')
+        if asiento in (None, ''):
+            return None
+        return int(asiento)
+
 class BoletoEditForm(forms.ModelForm):
     asiento = forms.ChoiceField(label='Asiento disponible')
 

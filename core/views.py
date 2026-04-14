@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
+from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Viaje, Boleto, Pasajero, Bus, Ruta
 from .forms import BoletoPurchaseForm, BoletoEditForm, BusForm, RutaForm, ViajeForm
@@ -99,6 +100,7 @@ def comprar_boleto(request, viaje_id):
                     boleto = Boleto(viaje=viaje, pasajero=pasajero, asiento=asiento_num)
                     boleto.full_clean()
                     boleto.save()
+                messages.success(request, f'Compra exitosa. Asientos reservados: {", ".join(str(n) for n in asientos)}')
                 return redirect('mis_boletos')
             except Exception as e:
                 form.add_error(None, e)
