@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Panel de administración</h2>
+
+{% if mensaje %}
+<div class="alert alert-success">{{ mensaje }}</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3 p-3">
+            <h5>Crear bus</h5>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="bus" />
+                {{ bus_form.as_p }}
+                <button class="btn btn-primary">Guardar bus</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3 p-3">
+            <h5>Crear ruta</h5>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="ruta" />
+                {{ ruta_form.as_p }}
+                <button class="btn btn-primary">Guardar ruta</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3 p-3">
+            <h5>Crear viaje</h5>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="viaje" />
+                {{ viaje_form.as_p }}
+                <button class="btn btn-primary">Guardar viaje</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <h5>Buses</h5>
+        <ul class="list-group">
+            {% for bus in buses %}
+            <li class="list-group-item">{{ bus.placa }} - Capacidad {{ bus.capacidad }}</li>
+            {% empty %}
+            <li class="list-group-item">No hay buses</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <h5>Rutas</h5>
+        <ul class="list-group">
+            {% for ruta in rutas %}
+            <li class="list-group-item">{{ ruta.origen }} → {{ ruta.destino }} - Q{{ ruta.precio }}</li>
+            {% empty %}
+            <li class="list-group-item">No hay rutas</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <h5>Viajes</h5>
+        <ul class="list-group">
+            {% for viaje in viajes %}
+            <li class="list-group-item">{{ viaje.ruta.origen }} → {{ viaje.ruta.destino }} | {{ viaje.fecha_hora }} | Bus {{ viaje.bus.placa }}</li>
+            {% empty %}
+            <li class="list-group-item">No hay viajes</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -5,11 +5,23 @@
 
 <div class="card p-3">
     <p><strong>Viaje:</strong> {{ viaje }}</p>
+    <p><strong>Bus:</strong> {{ viaje.bus.placa }}</p>
+    <p><strong>Capacidad:</strong> {{ capacidad }}</p>
+    <p><strong>Asientos ocupados:</strong> {{ ocupados|length }} / {{ capacidad }}</p>
+    <p><strong>Asientos disponibles:</strong> {{ disponibles|length }}</p>
+
+    {% if ocupados %}
+        <p><strong>Asientos reservados:</strong> {{ ocupados|join:", " }}</p>
+    {% endif %}
 
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button class="btn btn-success">Comprar</button>
+        {% if disponibles %}
+            <button class="btn btn-success">Comprar</button>
+        {% else %}
+            <div class="alert alert-warning">No hay asientos disponibles para este viaje.</div>
+        {% endif %}
     </form>
 </div>
 {% endblock %}

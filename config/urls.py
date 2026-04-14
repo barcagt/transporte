@@ -26,4 +26,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('comprar/<int:viaje_id>/', views.comprar_boleto, name='comprar_boleto'),
     path('mis-boletos/', views.mis_boletos, name='mis_boletos'),
+    path('admin-gestion/', views.admin_panel, name='admin_panel'),
 ]
