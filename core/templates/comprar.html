@@ -3,25 +3,68 @@
 {% block content %}
 <h2>Comprar boleto</h2>
 
-<div class="card p-3">
-    <p><strong>Viaje:</strong> {{ viaje }}</p>
-    <p><strong>Bus:</strong> {{ viaje.bus.placa }}</p>
-    <p><strong>Capacidad:</strong> {{ capacidad }}</p>
-    <p><strong>Asientos ocupados:</strong> {{ ocupados|length }} / {{ capacidad }}</p>
-    <p><strong>Asientos disponibles:</strong> {{ disponibles|length }}</p>
+<div class="card p-4 shadow-sm mb-4">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="mb-3">
+                <p><strong>Viaje:</strong> {{ viaje.ruta.origen }} → {{ viaje.ruta.destino }}</p>
+                <p><strong>Fecha y hora:</strong> {{ viaje.fecha_hora }}</p>
+                <p><strong>Bus:</strong> {{ viaje.bus.placa }}</p>
+                <p><strong>Capacidad:</strong> {{ capacidad }}</p>
+                <p><strong>Asientos ocupados:</strong> {{ ocupados|length }} / {{ capacidad }}</p>
+                <p><strong>Asientos disponibles:</strong> {{ disponibles|length }}</p>
+            </div>
 
-    {% if ocupados %}
-        <p><strong>Asientos reservados:</strong> {{ ocupados|join:", " }}</p>
-    {% endif %}
+            {% if disponibles %}
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-success">Comprar</button>
+                </form>
+                <div class="alert alert-info py-2">
+                    Si compras más de 1 boleto, el sistema asignará automáticamente los asientos libres más cercanos.
+                </div>
+            {% else %}
+                <div class="alert alert-warning">No hay asientos disponibles para este viaje.</div>
+            {% endif %}
+        </div>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        {% if disponibles %}
-            <button class="btn btn-success">Comprar</button>
-        {% else %}
-            <div class="alert alert-warning">No hay asientos disponibles para este viaje.</div>
-        {% endif %}
-    </form>
+        <div class="col-lg-6">
+            <div class="seat-map p-3 rounded bg-light">
+                <h5 class="mb-3">Mapa de asientos</h5>
+                <div class="seat-grid mb-3">
+                    {% for seat in seat_layout %}
+                        <div class="seat seat-{{ seat.status }}">{{ seat.numero }}</div>
+                    {% endfor %}
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge bg-success">Disponible</span>
+                    <span class="badge bg-danger">Ocupado</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+.seat {
+    border-radius: 12px;
+    padding: 18px 0;
+    text-align: center;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.seat-disponible {
+    background: #198754;
+}
+.seat-ocupado {
+    background: #dc3545;
+}
+</style>
 {% endblock %}

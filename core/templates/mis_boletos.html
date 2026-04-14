@@ -3,22 +3,32 @@
 {% block content %}
 <h2>Mis boletos</h2>
 
-<table class="table">
-    <thead>
+<table class="table table-hover align-middle">
+    <thead class="table-secondary">
         <tr>
             <th>Viaje</th>
+            <th>Fecha</th>
             <th>Asiento</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
         {% for boleto in boletos %}
         <tr>
-            <td>{{ boleto.viaje }}</td>
+            <td>{{ boleto.viaje.ruta.origen }} → {{ boleto.viaje.ruta.destino }}</td>
+            <td>{{ boleto.viaje.fecha_hora }}</td>
             <td>{{ boleto.asiento }}</td>
+            <td>
+                <a href="{% url 'editar_boleto' boleto.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <form action="{% url 'eliminar_boleto' boleto.id %}" method="post" style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </form>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="2">No tienes boletos</td>
+            <td colspan="4">No tienes boletos</td>
         </tr>
         {% endfor %}
     </tbody>

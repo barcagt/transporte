@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from .models import Viaje, Boleto, Pasajero, Bus, Ruta
-from .forms import BoletoForm, BusForm, RutaForm, ViajeForm
+from .forms import BoletoPurchaseForm, BoletoEditForm, BusForm, RutaForm, ViajeForm
 
 def lista_viajes(request):
     viajes = Viaje.objects.all()
@@ -50,6 +50,15 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+def build_seat_layout(capacidad, ocupados):
+    return [
+        {
+            'numero': n,
+            'status': 'ocupado' if n in ocupados else 'disponible'
+        }
+        for n in range(1, capacidad + 1)
+    ]
+
 @login_required
 def comprar_boleto(request, viaje_id):
     viaje = get_object_or_404(Viaje, id=viaje_id)
@@ -65,29 +74,37 @@ def comprar_boleto(request, viaje_id):
     ocupados = list(Boleto.objects.filter(viaje=viaje).values_list('asiento', flat=True))
     capacidad = viaje.bus.capacidad
     disponibles = [s for s in range(1, capacidad + 1) if s not in ocupados]
+    seat_layout = build_seat_layout(capacidad, ocupados)
 
     if request.method == 'POST':
-        form = BoletoForm(request.POST, available_seats=disponibles)
+        form = BoletoPurchaseForm(request.POST, available_seats=disponibles)
         if form.is_valid():
-            boleto = form.save(commit=False)
-            boleto.viaje = viaje
-            boleto.pasajero = pasajero
+            cantidad = form.cleaned_data['cantidad']
+            asiento = form.cleaned_data.get('asiento')
+
+            if cantidad == 1:
+                asientos = [int(asiento)]
+            else:
+                asientos = disponibles[:cantidad]
 
             try:
-                boleto.full_clean()
-                boleto.save()
+                for asiento_num in asientos:
+                    boleto = Boleto(viaje=viaje, pasajero=pasajero, asiento=asiento_num)
+                    boleto.full_clean()
+                    boleto.save()
                 return redirect('mis_boletos')
             except Exception as e:
                 form.add_error(None, e)
     else:
-        form = BoletoForm(available_seats=disponibles)
+        form = BoletoPurchaseForm(available_seats=disponibles)
 
     return render(request, 'comprar.html', {
         'form': form,
         'viaje': viaje,
         'ocupados': ocupados,
         'disponibles': disponibles,
-        'capacidad': capacidad
+        'capacidad': capacidad,
+        'seat_layout': seat_layout
     })
 
 @login_required
@@ -144,3 +161,39 @@ def mis_boletos(request):
 
     boletos = Boleto.objects.filter(pasajero=pasajero)
     return render(request, 'mis_boletos.html', {'boletos': boletos})
+
+@login_required
+def editar_boleto(request, boleto_id):
+    boleto = get_object_or_404(Boleto, id=boleto_id, pasajero__user=request.user)
+    viaje = boleto.viaje
+
+    ocupados = list(Boleto.objects.filter(viaje=viaje).exclude(id=boleto.id).values_list('asiento', flat=True))
+    disponibles = [s for s in range(1, viaje.bus.capacidad + 1) if s not in ocupados]
+    available_seats = sorted(set(disponibles + [boleto.asiento]))
+
+    if request.method == 'POST':
+        form = BoletoEditForm(request.POST, instance=boleto, available_seats=available_seats)
+        if form.is_valid():
+            try:
+                form.save()
+                return redirect('mis_boletos')
+            except Exception as e:
+                form.add_error(None, e)
+    else:
+        form = BoletoEditForm(instance=boleto, available_seats=available_seats)
+
+    return render(request, 'editar_boleto.html', {
+        'form': form,
+        'boleto': boleto,
+        'viaje': viaje,
+    })
+
+@login_required
+def eliminar_boleto(request, boleto_id):
+    boleto = get_object_or_404(Boleto, id=boleto_id, pasajero__user=request.user)
+
+    if request.method == 'POST':
+        boleto.delete()
+        return redirect('mis_boletos')
+
+    return render(request, 'confirmar_eliminar_boleto.html', {'boleto': boleto})

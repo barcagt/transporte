@@ -1,8 +1,43 @@
 from django import forms
 from .models import Boleto, Bus, Ruta, Viaje
 
-class BoletoForm(forms.ModelForm):
-    asiento = forms.ChoiceField(label='Asiento')
+class BoletoPurchaseForm(forms.Form):
+    cantidad = forms.IntegerField(
+        label='¿Cuántos boletos deseas?',
+        min_value=1,
+        initial=1,
+        help_text='Puedes elegir hasta el número de asientos disponibles.'
+    )
+    asiento = forms.ChoiceField(
+        label='Selecciona asiento (para 1 boleto)',
+        required=False
+    )
+
+    def __init__(self, *args, available_seats=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        available_seats = available_seats or []
+        choices = [('', 'Elige un asiento')] + [(str(seat), str(seat)) for seat in available_seats]
+        self.fields['asiento'].choices = choices
+        max_tickets = max(1, min(5, len(available_seats)))
+        self.fields['cantidad'].max_value = max_tickets
+        self.fields['cantidad'].widget.attrs.update({'min': 1, 'max': max_tickets})
+        self.available_seats = available_seats
+
+    def clean(self):
+        cleaned = super().clean()
+        cantidad = cleaned.get('cantidad')
+        asiento = cleaned.get('asiento')
+
+        if cantidad == 1 and not asiento:
+            self.add_error('asiento', 'Selecciona el asiento para este boleto.')
+
+        if cantidad and cantidad > len(self.available_seats):
+            self.add_error('cantidad', f'Solo hay {len(self.available_seats)} asientos disponibles.')
+
+        return cleaned
+
+class BoletoEditForm(forms.ModelForm):
+    asiento = forms.ChoiceField(label='Asiento disponible')
 
     class Meta:
         model = Boleto
@@ -10,10 +45,8 @@ class BoletoForm(forms.ModelForm):
 
     def __init__(self, *args, available_seats=None, **kwargs):
         super().__init__(*args, **kwargs)
-        choices = []
-        if available_seats is not None:
-            choices = [(str(seat), str(seat)) for seat in available_seats]
-        self.fields['asiento'].choices = choices
+        available_seats = available_seats or []
+        self.fields['asiento'].choices = [(str(seat), str(seat)) for seat in available_seats]
 
     def clean_asiento(self):
         asiento = self.cleaned_data.get('asiento')

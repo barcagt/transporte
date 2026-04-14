@@ -26,5 +26,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('comprar/<int:viaje_id>/', views.comprar_boleto, name='comprar_boleto'),
     path('mis-boletos/', views.mis_boletos, name='mis_boletos'),
+    path('boleto/<int:boleto_id>/editar/', views.editar_boleto, name='editar_boleto'),
+    path('boleto/<int:boleto_id>/eliminar/', views.eliminar_boleto, name='eliminar_boleto'),
     path('admin-gestion/', views.admin_panel, name='admin_panel'),
 ]

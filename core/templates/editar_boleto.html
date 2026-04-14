@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Editar boleto</h2>
+
+<div class="card p-4 shadow-sm">
+    <p><strong>Viaje:</strong> {{ viaje.ruta.origen }} → {{ viaje.ruta.destino }}</p>
+    <p><strong>Fecha:</strong> {{ viaje.fecha_hora }}</p>
+    <p><strong>Asiento actual:</strong> {{ boleto.asiento }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary">Guardar cambios</button>
+        <a href="{% url 'mis_boletos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
