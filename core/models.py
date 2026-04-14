@@ -54,11 +54,11 @@ class Boleto(models.Model):
         if self.asiento > self.viaje.bus.capacidad:
             raise ValidationError("Número de asiento excede capacidad del bus")
 
-        # Validar conflicto horario para el pasajero
+        # Validar conflicto horario para el pasajero en viajes distintos
         if Boleto.objects.filter(
             pasajero=self.pasajero,
             viaje__fecha_hora=self.viaje.fecha_hora
-        ).exclude(id=self.id).exists():
+        ).exclude(id=self.id).exclude(viaje=self.viaje).exists():
             raise ValidationError("Ya tienes un viaje con la misma fecha y hora.")
 
         # Validar cantidad de boletos
